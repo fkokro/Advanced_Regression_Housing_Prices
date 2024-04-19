@@ -5,3 +5,4 @@ seaborn
 SQLAlchemy
 psycopg2
 requests
+dill

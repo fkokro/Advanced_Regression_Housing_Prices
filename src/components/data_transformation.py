@@ -11,6 +11,7 @@ from src.exception import CustomException
 from src.logger import logging
 import numpy as np
 from sklearn.model_selection import train_test_split
+from src.utils import save_object
 
 
 @dataclass
@@ -61,7 +62,7 @@ class DataTransfomation:
             data_df=pd.read_csv(data_path, sep='|')
             target = data_df[['SalePrice']].copy()
             features = data_df.drop(columns=['SalePrice'])
-            logging.info('Obtaining preprocessing objects')
+            logging.info('Data load complete.')
             logging.info('Obtaining preprocessing objects')
 
             encoding_obj=self.get_data_encoder_object()          
@@ -88,7 +89,25 @@ class DataTransfomation:
                 (scaled_testing_data, np.array(test_target).reshape(-1,1))
                 )
             logging.info('Processed train and test objects complete.')
-                            
+            
+            
+            save_object(
+                file_path=self.data_transformation_config.preprocessor_obj_file_path,
+                obj=encoding_obj,
+            )
+            
+            save_object(
+                file_path=self.data_transformation_config.preprocessor_obj_file_path,
+                obj=scaler               
+            )
+            
+            return(
+                processed_train_data_arr,
+                processed_test_data_arr,
+                self.data_transformation_config.preprocessor_obj_file_path
+            )
+            
+              
         except Exception as e:
             raise CustomException(e,sys)
             
