@@ -8,6 +8,9 @@ from src.logger import logging
 import psycopg2
 import json
 from configuration import local_settings
+from src.components.data_transformation import DataTransfomation
+from src.components.data_transformation import DataTransfomationConfig
+
 
 # Load config file
 config_postgres = local_settings.config_postgres
@@ -50,7 +53,7 @@ class DataETL:
         for col in df.columns:
             check = df[col].dtypes
             if check == 'object':
-                df.fillna({col:'None'}, inplace=True)
+                df.fillna({col:'NONE'}, inplace=True)
             else:
                 df.fillna({col:df[col].mean()}, inplace=True)
         
@@ -62,8 +65,8 @@ class DataETL:
         try:
             train_df = self.csv_extract('notebooks/data/train.csv')
             test_df = self.csv_extract('notebooks/data/test.csv')
-            train_df.rename(columns={'1stFlrSF':'FirstFlrSF','2ndFlrSF':'SeondFlrSF','3SsnPorch':'ThreeSsnPorch'}, inplace=True)
-            test_df.rename(columns={'1stFlrSF':'FirstFlrSF','2ndFlrSF':'SeondFlrSF','3SsnPorch':'ThreeSsnPorch'}, inplace=True)
+            train_df.rename(columns={'1stFlrSF':'FirstFlrSF','2ndFlrSF':'SecondFlrSF','3SsnPorch':'ThreeSsnPorch'}, inplace=True)
+            test_df.rename(columns={'1stFlrSF':'FirstFlrSF','2ndFlrSF':'SecondFlrSF','3SsnPorch':'ThreeSsnPorch'}, inplace=True)
             trained_processed_df = self.fill_none_housing_data(train_df)
             test_processed_df = self.fill_none_housing_data(test_df)
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)
@@ -75,6 +78,13 @@ class DataETL:
             test_processed_df.to_csv(self.ingestion_config.test_data_path, index=False, header=True)
             test_processed_df.to_csv(self.ingestion_config.test_data_txt_path, sep='|', index=False)
             logging.info('Data processed and stored in artifacts.')
+            
+            return(
+                trained_processed_df,
+                test_processed_df,
+                self.ingestion_config.train_data_txt_path,
+                self.ingestion_config.test_data_txt_path
+            )
             
         except Exception as e:
             raise CustomException(e, sys)
@@ -203,8 +213,10 @@ class DataETL:
 
 if __name__=="__main__":
    data_etl = DataETL()
-   data_etl.process_housing_file()
+   train, test, train_path, test_path = data_etl.process_housing_file()
    data_etl.create_train_table_dev()
    data_etl.create_test_table_dev()
    data_etl.load_train_table_dev()
    data_etl.load_test_table_dev()
+   data_transformation=DataTransfomation()
+   data_transformation.initiate_data_transformation(train_path)  
