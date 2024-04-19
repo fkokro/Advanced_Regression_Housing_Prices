@@ -62,49 +62,33 @@ class DataTransfomation:
             target = data_df[['SalePrice']].copy()
             features = data_df.drop(columns=['SalePrice'])
             logging.info('Obtaining preprocessing objects')
+            logging.info('Obtaining preprocessing objects')
+
             encoding_obj=self.get_data_encoder_object()          
             encoded_arr = encoding_obj.fit_transform(features)
+            logging.info('Encoding complete.')
+          
             df = pd.DataFrame(encoded_arr.toarray())
+
             train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
-            logging.info('Read train and test data complete.')
+            train_target, test_target = train_test_split(target, test_size=0.2, random_state=42)
+            logging.info('Train and test data split complete.')
+
             scaler = StandardScaler(with_mean=False)
             scaled_training_data = scaler.fit_transform(train_set)
             scaled_testing_data = scaler.transform(test_set)
-            print(scaled_testing_data )
-            # train_set_array = scaler_obj.fit_transform(train_set)
-            # test_set_array = scaler_obj.transform(test_set)
-            # print(train_set_array)
-            # logging.info('Dataframe split test, train sets.')
-            # print(train_set.columns)
-            # print(test_set.columns)
-            # logging.info('Obtaining preprocessing object')
-            # preprocessor_obj=self.get_data_transformer_object()
-            
-            # target_column_name = 'SalePrice'
-            # # Training set
-            # target_feature_train_df=train_set[target_column_name]
-            # input_feature_train_df=train_set.drop(columns=[target_column_name],axis=1)
-            # # Test set
-            # target_feature_test_df=test_set[target_column_name]           
-            # input_feature_test_df=test_set.drop(columns=[target_column_name],axis=1)
-            
-            
-            # logging.info("Applying preprocessing object on training dataframe and testing dataframe.")
-            # input_feature_train_arr=preprocessor_obj.fit_transform(input_feature_train_df)
-            # input_feature_test_arr=preprocessor_obj.transform(input_feature_test_df)
-            # logging.info("Preprocessing complete.")
+            logging.info('Data scaling complete.')
 
-            # processed_train_data_arr = np.column_stack(
-            #     (input_feature_train_arr.toarray(), np.array(target_feature_train_df))
-            #     )
+            processed_train_data_arr = np.column_stack(
+                (scaled_training_data, np.array(train_target).reshape(-1,1))
+                )
 
-            # print(processed_train_data_arr)
 
-            # processed_test_data_arr = np.column_stack(
-            #     (input_feature_test_arr.toarray(), np.array(target_feature_test_df))
-            #     )
-
-            # print(processed_test_data_arr)                                            
+            processed_test_data_arr = np.column_stack(
+                (scaled_testing_data, np.array(test_target).reshape(-1,1))
+                )
+            logging.info('Processed train and test objects complete.')
+                            
         except Exception as e:
             raise CustomException(e,sys)
             
