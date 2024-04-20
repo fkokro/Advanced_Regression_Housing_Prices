@@ -10,7 +10,8 @@ import json
 from configuration import local_settings
 from src.components.data_transformation import DataTransfomation
 from src.components.data_transformation import DataTransfomationConfig
-
+from src.components.model_trainer import ModelTrainerConfig
+from src.components.model_trainer import ModelTrainer
 
 # Load config file
 config_postgres = local_settings.config_postgres
@@ -219,4 +220,6 @@ if __name__=="__main__":
    data_etl.load_train_table_dev()
    data_etl.load_test_table_dev()
    data_transformation=DataTransfomation()
-   data_transformation.initiate_data_transformation(train_path)  
+   train_arr,test_arr,_ = data_transformation.initiate_data_transformation(train_path)
+   modeltrainer=ModelTrainer()
+   print(modeltrainer.initiate_model_trainer(train_arr,test_arr))

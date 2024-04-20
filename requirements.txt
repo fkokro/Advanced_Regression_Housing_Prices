@@ -6,3 +6,6 @@ SQLAlchemy
 psycopg2
 requests
 dill
+catboost
+xgboost
+
